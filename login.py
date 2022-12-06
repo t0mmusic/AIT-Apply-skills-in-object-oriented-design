@@ -71,16 +71,19 @@ class Account:
 	def showLeaderboard():
 		scoreArray = accountArray
 		scoreArray.sort(key=lambda x: x.highScore, reverse=True)
+		ret = []
 		i = 0
 		print("****************************")
 		for x in scoreArray:
-			print(str(x.username) + ": " + str(x.highScore))
 			i += 1
+			print(str(i) + ": " + str(x.username) + ": " + str(x.highScore))
+			ret.append(str(i) + ": " + str(x.username) + ": " + str(x.highScore))
 			if (i == 10):
 				break
 		if (i == 0):
 			print("No high scores to display!")
 		print("****************************")
+		return(ret)
 
 	# Selection menu for accounts
 	# 1 = login to existing account
@@ -118,6 +121,12 @@ class UserPassword:
 			print("Passwords entered do not match.")
 			return (False)
 
+	# sets password with hashfunction using matching strings
+	def setPassword(p1, p2):
+		if (p1 == p2):
+			return (hashlib.md5(p1.encode()).hexdigest())
+		return (False)
+
 	# Sets username, checks whether same username already
 	# exists in database
 	def setUsername():
@@ -145,6 +154,16 @@ class UserPassword:
 		accountArray.append(ret)
 		return (ret)
 
+	# creates account using verified username and password
+	def createAccount(username, password):
+		account = [username, password, 0, 0]
+		with open('userBase.csv', 'a', encoding='UTF8', newline='') as f:
+			writer = csv.writer(f)
+			writer.writerow(account)
+		ret = Account(username, password, 0, 0)
+		accountArray.append(ret)
+		return (ret)
+
 	# Username and password are checked against database for validity
 	# If either are incorrect, False is returned,
 	# otherwise, matching Account is returned.
@@ -160,6 +179,11 @@ class UserPassword:
 		ret = Account.compareUsername(username)
 		print("Successfully logged in.")
 		return (ret)
+
+	# logs in to account once username and password have
+	# been verified
+	def login(username):
+		return (Account.compareUsername(username))
 
 # populates account array when script is run
 Account.importUserData()

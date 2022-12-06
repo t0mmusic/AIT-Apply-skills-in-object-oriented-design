@@ -1,10 +1,8 @@
-import login
-import fish
+import gui
 
-# User logs into account, then plays the game
+# Opens the gui for player to begin playing game
 def main():
-	currUser = login.Account.accountMenu()
-	fish.Fish.fishingGame(currUser)
+	gui.game()
 
 if __name__ == "__main__":
 	main()
