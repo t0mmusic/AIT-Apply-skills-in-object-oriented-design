@@ -5,14 +5,14 @@ import PySimpleGUI as sg
 sg.theme('DarkRed')
 # layout for the login selection screen
 layoutLog = [ 
-			[sg.Text("Username"), sg.Input(key='USER')],
-			[sg.Text("Password"), sg.Input(key='PASS', password_char='*')]
+			[sg.Text("Username", size=(15, 1)), sg.Input(key='USER')],
+			[sg.Text("Password", size=(15, 1)), sg.Input(key='PASS', password_char='*')]
 		]
 # layout for the signup selection screen
 layoutSign = [
-			[sg.Text("Username"), sg.Input(key='USER_LOG')],
-			[sg.Text("Password"), sg.Input(key='PASS_ONE', password_char='*')],
-			[sg.Text("Re-enter Password"), sg.Input(key='PASS_TWO', password_char='*')]
+			[sg.Text("Username", size=(15, 1)), sg.Input(key='USER_LOG')],
+			[sg.Text("Password", size=(15, 1)), sg.Input(key='PASS_ONE', password_char='*')],
+			[sg.Text("Re-enter Password", size=(15, 1)), sg.Input(key='PASS_TWO', password_char='*')]
 		]
 # layout for the leaderboard display screen
 layoutScore = []
@@ -41,7 +41,7 @@ layout = [
 
 # creates a window gui
 # sg.theme_previewer()
-window = sg.Window('The fishing game', layout, size=(500, 500))
+window = sg.Window('Hello and thanks for all the fish', layout, size=(500, 500), finalize=True)
 
 # if the username and password fields have been filled in, the username
 # exists in the database and matches the input password, the user will
@@ -52,8 +52,8 @@ def	loginGame(values):
 		window['INFO'].update("All fields must be filled in.")
 		return (False)
 	if (login.Account.compareUsername(values['USER'])):
-		if (login.Account.comparePassword(values['PASS'])):
-			currUser = login.UserPassword.login(values['USER'])
+		currUser = login.UserPassword.login(values['USER'], values['PASS'])
+		if (currUser != False):
 			return (currUser)
 		else:
 			window['INFO'].update("incorrect password")
@@ -94,6 +94,7 @@ def updateHighScores():
 def preGameMenu():
 	# sets the currently visible column to the login screen
 	currentColumn = window['COL1']
+	window.bind("<Return>", 'LOGIN')
 	while (True):
 		event, values = window.read()
 		# Exits cleanly if user closes window
@@ -112,6 +113,7 @@ def preGameMenu():
 		# Displays log in menu
 		if (event == 'LOGIN_MENU'):
 			window['INFO'].update("")
+			window.bind("<Return>", 'LOGIN')
 			window['LOGIN'].update(visible=True)
 			window['SIGNUP'].update(visible=False)
 			currentColumn.update(visible=False)
@@ -121,12 +123,13 @@ def preGameMenu():
 		if (event == 'SIGNUP_MENU'):
 			window['INFO'].update("")
 			window['LOGIN'].update(visible=False)
+			window.bind("<Return>", 'SIGNUP')
 			window['SIGNUP'].update(visible=True)
 			currentColumn.update(visible=False)
 			window['COL2'].update(visible=True)
 			currentColumn = window['COL2']
 		# Logs in user, or displays error
-		if (event == 'LOGIN'):
+		if (event == 'LOGIN' or event == "_Enter"):
 			ret = loginGame(values)
 			if (ret != False):
 				currentColumn.update(visible=False)
@@ -138,6 +141,8 @@ def preGameMenu():
 				currentColumn.update(visible=False)
 				return (ret)
 
+# updates the image to the appropriate matching fish. If there
+# are more than 6 fish, others are given a placeholder image.
 def updateImage(fish):
 	if (fish == "King George Whiting"):
 		img = 'KGW.png'
@@ -153,7 +158,7 @@ def updateImage(fish):
 		img = 'SeaweedMonster.png'
 	else:
 		img = 'fishing.png'
-	window['IMG'].update(img, size=(300, 300), visible=True)
+	window['IMG'].update(img, size=(500, 300), visible=True)
 	
 
 # Gameplay menu for the gui. User can cast a line, then choose to keep
@@ -196,6 +201,8 @@ def gamePlay(currUser):
 			window['KEEP'].update(visible=False)
 			window['RELEASE'].update(visible=False)
 			window['THROW'].update(visible=True)
+		# if the highscore value is lower than the current score value, it is
+		# updated to the current value
 		if (currUser.score > currUser.highScore):
 			currUser.highScore = currUser.score
 		# Displays LeaderBoard

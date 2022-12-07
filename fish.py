@@ -46,10 +46,10 @@ class Fish:
 			csv_reader = csv.reader(f, delimiter=',')
 			count = 0
 			for row in csv_reader:
-					if (count != 0):
-						fish = Fish(row[0], row[1], row[2], row[3], row[4])
-						fishArray.append(fish)
-					count += 1
+				if (count != 0):
+					fish = Fish(row[0], row[1], row[2], row[3], row[4])
+					fishArray.append(fish)
+				count += 1
 			Fish.ranCount += count
 
 	# Randomly returns one Fish from the array
@@ -81,7 +81,7 @@ class Fish:
 				if (currUser.highScore < currUser.score):
 					currUser.highScore = currUser.score
 			elif (select == "2"):
-					break
+				break
 			else:
 				print("Invalid Selection!")
 			login.Account.updateData()

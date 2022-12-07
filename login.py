@@ -31,7 +31,7 @@ class Account:
 
 	# Checks if a password is already registered in database
 	def comparePassword(password):
-		hash_password = hashlib.md5(password.encode()).hexdigest()
+		hash_password = hashPassword(password)
 		for x in accountArray:
 			if (x.password == hash_password):
 				return (x)
@@ -65,6 +65,9 @@ class Account:
 			for x in accountArray:
 				account = [x.username, x.password, x.score, x.highScore]
 				writer.writerow(account)
+
+	def hashPassword(password):
+		return (hashlib.md5(password.encode()).hexdigest())
 
 	# Displays the top 10 accounts by high score, or all accounts if less than
 	# 10 are in the database
@@ -116,7 +119,7 @@ class UserPassword:
 		auth1 = getpass.getpass("Enter Password: ")
 		auth2 = getpass.getpass("Confirm Password: ")
 		if (auth1 == auth2):
-			return (hashlib.md5(auth1.encode()).hexdigest())
+			return (Account.hashPassword(auth1))
 		else:
 			print("Passwords entered do not match.")
 			return (False)
@@ -124,7 +127,7 @@ class UserPassword:
 	# sets password with hashfunction using matching strings
 	def setPassword(p1, p2):
 		if (p1 == p2):
-			return (hashlib.md5(p1.encode()).hexdigest())
+			return (Account.hashPassword(p1))
 		return (False)
 
 	# Sets username, checks whether same username already
@@ -182,8 +185,13 @@ class UserPassword:
 
 	# logs in to account once username and password have
 	# been verified
-	def login(username):
-		return (Account.compareUsername(username))
+	def login(username, password):
+		user = Account.compareUsername(username)
+		if (user == False):
+			return (user)
+		if (Account.hashPassword(password) != user.password):
+			return False
+		return (user)
 
 # populates account array when script is run
 Account.importUserData()
