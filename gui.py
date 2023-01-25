@@ -21,13 +21,16 @@ layoutGame = [
 			[sg.Button('Cast a line!', key='THROW'),
 			sg.Button('Keep', visible=False, key='KEEP'),
 			sg.Button('Release', visible=False, key='RELEASE')],
+			[sg.Multiline(size=(30, 5), visible=False, key='CATCHLIST')],
 			[sg.Text("Current Score: 0", key='CURR_SCORE')]
 		]
 # universal layout to display all features of the gui
 layout = [
 			[sg.Button('Log In', key='LOGIN_MENU'),
 			sg.Button('Sign Up', key='SIGNUP_MENU'),
-			sg.Button('High Scores', key='SCORE')],
+			sg.Button('High Scores', key='SCORE'),
+			sg.Button('Bucket', visible=False, key='BUCKET'),
+			sg.Text(key='LOGNAME')],
 			[sg.Text(key='INFO')],
 			[sg.Column(layoutLog, key='COL1'),
 			sg.Column(layoutSign, visible=False, key='COL2'),
@@ -41,7 +44,7 @@ layout = [
 
 # creates a window gui
 # sg.theme_previewer()
-window = sg.Window('Hello and thanks for all the fish', layout, size=(500, 500), finalize=True)
+window = sg.Window('Hello and thanks for all the fish', layout, size=(500, 300), finalize=True)
 
 # if the username and password fields have been filled in, the username
 # exists in the database and matches the input password, the user will
@@ -83,7 +86,7 @@ def signUpGame(values):
 # this information into a single string which is displayed on the screen.
 def updateHighScores():
 	scoreArray = login.Account.showLeaderboard()
-	scoreString = '\n'.join([str(x) for x in scoreArray])
+	scoreString = "Top 10 Scores\n" + '\n'.join([str(x) for x in scoreArray])
 	if (scoreString):
 		window['INFO'].update(scoreString)
 	else:
@@ -172,30 +175,41 @@ def gamePlay(currUser):
 	window['LOGIN_MENU'].update(visible=False)
 	window['SIGNUP_MENU'].update(visible=False)
 	window['COL4'].update(visible=True)
+	window['BUCKET'].update(visible=True)
 	window['INFO'].update("")
+	window['LOGNAME'].update(currUser.username)
 	while (True):
 		event, values = window.read()
 		if (event == sg.WINDOW_CLOSED or event == 'EXIT'):
 			break
+		window.bind("<Return>", 'THROW')
 		# User casts a line to catch a fish, caught fish is displayed
 		if (event == 'THROW'):
+			window.bind("<Return>", 'KEEP')
 			window['KEEP'].update(visible=True)
 			window['RELEASE'].update(visible=True)
 			window['THROW'].update(visible=False)
+			window['CATCHLIST'].update(visible=False)
 			catch = fish.Fish.castLine()
 			window['INFO'].update("You caught a " + catch.name + "!")
 			updateImage(catch.name)
 		# User keeps fish, score is updated with points_kept added
 		if (event == 'KEEP'):
 			currUser.score += int(catch.points_keep)
+			window['CATCHLIST'].update(visible=False)
 			window['CURR_SCORE'].update("Current Score: " + str(currUser.score))
 			window['INFO'].update("You decided to keep your catch!")
 			window['KEEP'].update(visible=False)
 			window['RELEASE'].update(visible=False)
 			window['THROW'].update(visible=True)
+			if (window['CATCHLIST'].get() == ""):
+				window['CATCHLIST'].update(catch.name)
+			else:
+				window['CATCHLIST'].update(window['CATCHLIST'].get() + "\n" + catch.name)
 		# User releases fish, score is updated with points_release added
 		if (event == 'RELEASE'):
 			currUser.score += int(catch.points_release)
+			window['CATCHLIST'].update(visible=False)
 			window['CURR_SCORE'].update("Current Score: " + str(currUser.score))
 			window['INFO'].update("You decided to release your catch!")
 			window['KEEP'].update(visible=False)
@@ -205,9 +219,13 @@ def gamePlay(currUser):
 		# updated to the current value
 		if (currUser.score > currUser.highScore):
 			currUser.highScore = currUser.score
+		# displays the bucket of fish caught by the user
+		if (event == 'BUCKET'):
+			window['CATCHLIST'].update(visible=True)
 		# Displays LeaderBoard
 		if (event == 'SCORE'):
 			window['SCORE'].update(visible=False)
+			window['CATCHLIST'].update(visible=False)
 			window['LOGIN_MENU'].update("Back to game", visible=True)
 			window['INFO'].update("")
 			currentColumn.update(visible=False)
@@ -222,8 +240,8 @@ def gamePlay(currUser):
 			currentColumn.update(visible=False)
 			window['COL4'].update(visible=True)
 			currentColumn = window['COL4']
-	# database is updated with new scores
-	login.Account.updateData()
+		# database is updated with new scores
+		login.Account.updateData()
 	# gui window is closed
 	window.close()
 
