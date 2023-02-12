@@ -36,7 +36,7 @@ themes = ['Black', 'BlueMono', 'BluePurple', 'BrightColors', 'BrownBlue',
 			'Tan', 'TanBlue', 'TealMono', 'Topanga']
 
 # Sets a random theme from the array
-sg.theme(themes[random.randint(0, len(themes))])
+sg.theme(themes[random.randint(0, len(themes) - 1)])
 # layout for the login selection screen
 layoutLog = [
 			[sg.Text("Username", size=(15, 1)), sg.Input(key='USER')],
@@ -79,7 +79,7 @@ layout = [
 
 # creates a window gui
 # sg.theme_previewer()
-window = sg.Window('Hello and thanks for all the fish', layout, size=(500, 300), finalize=True)
+window = sg.Window('Hello and thanks for all the fish', layout, size=(800, 600), finalize=True)
 
 # if the username and password fields have been filled in, the username
 # exists in the database and matches the input password, the user will
@@ -200,7 +200,7 @@ def updateImage(fish):
 		img = 'SeaweedMonster.png'
 	else:
 		img = 'fishing.png'
-	window['IMG'].update(img, size=(500, 300), visible=True)
+	window['IMG'].update(img, size=(700, 225), visible=True)
 
 
 # Gameplay menu for the gui. User can cast a line, then choose to keep
@@ -265,6 +265,7 @@ def gamePlay(currUser):
 			window['LOGNAME'].update(visible=False)
 			window['BUCKET'].update(visible=False)
 			window['SCORE'].update(visible=False)
+			window['IMG'].update(visible=False)
 			window['INFO'].update("")
 			currentColumn.update(visible=False)
 		# Displays LeaderBoard
@@ -273,6 +274,7 @@ def gamePlay(currUser):
 			window['BUCKET'].update(visible=False)
 			window['CATCHLIST'].update(visible=False)
 			window['LOGNAME'].update(visible=False)
+			window['IMG'].update(visible=False)
 			window['LOGIN_MENU'].update("Back to game", visible=True)
 			window['INFO'].update("")
 			currentColumn.update(visible=False)
@@ -293,6 +295,7 @@ def gamePlay(currUser):
 			window['INFO'].update(visible=True)
 			window['KEEP'].update(visible=True)
 			window['RELEASE'].update(visible=True)
+			window['IMG'].update(visible=True)
 			currentColumn = window['COL4']
 		# database is updated with new scores
 		login.Account.updateData()
